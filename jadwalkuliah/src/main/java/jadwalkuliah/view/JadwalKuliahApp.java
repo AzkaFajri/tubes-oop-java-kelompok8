@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import jadwalkuliah.reminder.ReminderService;
 import java.time.LocalTime;
+import jadwalkuliah.controller.JadwalController;
 
 /**
  *
@@ -217,6 +218,36 @@ public class JadwalKuliahApp extends JFrame {
             JOptionPane.showMessageDialog(this, "Data belum lengkap!");
             return;
         }
+        
+        try {
+        
+        String hariBaru = cbHari.getSelectedItem().toString();
+        String jamBaru = txtJamMulai.getText() + " - " + txtJamSelesai.getText();
+
+        LocalTime mulaiBaru = LocalTime.parse(txtJamMulai.getText());
+        LocalTime selesaiBaru = LocalTime.parse(txtJamSelesai.getText());
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+        String hariLama = tableModel.getValueAt(i, 1).toString();
+
+        if (!hariBaru.equals(hariLama)) continue;
+
+        String jamLamaStr = tableModel.getValueAt(i, 2).toString();
+        String[] jamSplit = jamLamaStr.split(" - ");
+
+        LocalTime mulaiLama = LocalTime.parse(jamSplit[0]);
+        LocalTime selesaiLama = LocalTime.parse(jamSplit[1]);
+
+    
+        if (mulaiBaru.isBefore(selesaiLama) &&
+        selesaiBaru.isAfter(mulaiLama)) {
+
+        throw new jadwalkuliah.exception.KonflikWaktuException(
+            "Konflik jadwal! Waktu bertabrakan dengan jadwal lain."
+                );
+            }
+        }
+
 
         tableModel.addRow(new Object[]{
                 dateFormat.format(dcTanggal.getDate()), // Format tanggal agar mudah dibaca
@@ -246,6 +277,9 @@ public class JadwalKuliahApp extends JFrame {
         clearForm();
         updateStatus("Jadwal berhasil disimpan");
     }
+        catch (jadwalkuliah.exception.KonflikWaktuException e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+        }}
 
     private void isiFormDariTabel() {
         selectedRow = table.getSelectedRow();
@@ -346,6 +380,8 @@ public class JadwalKuliahApp extends JFrame {
         table.setRowHeight(25);
     }
     private ReminderService reminderService = new ReminderService();
+    private JadwalController controller;
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new JadwalKuliahApp().setVisible(true));
