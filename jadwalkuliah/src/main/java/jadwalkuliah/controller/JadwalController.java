@@ -12,16 +12,19 @@ import jadwalkuliah.exception.KonflikWaktuException;
 public class JadwalController {
 
     private JadwalManager manager;
-    private ReminderService reminder;
+    private ReminderService reminderService;
 
     public JadwalController(JadwalManager manager) {
         this.manager = manager;
-        this.reminder = new ReminderService();
+        this.reminderService = new ReminderService();
     }
 
     public void tambahJadwal(MataKuliah mk)
             throws KonflikWaktuException {
         manager.tambah(mk);
-        reminder.pasangReminder(mk, 15);
+    }
+
+    public void aktifkanReminder(String namaMK, java.time.LocalTime jamMulai, int menitSebelum) {
+        reminderService.pasangReminder(namaMK, jamMulai, menitSebelum);
     }
 }
