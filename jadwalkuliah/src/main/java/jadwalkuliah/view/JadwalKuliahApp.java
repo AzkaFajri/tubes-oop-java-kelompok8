@@ -199,3 +199,155 @@ public class JadwalKuliahApp extends JFrame {
         
         return panel;
     }
+
+    private JPanel statusBar() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(ACCENT_COLOR); 
+        lblStatus = new JLabel("Status: Siap");
+        lblJumlah = new JLabel("Jadwal: 0");
+        lblStatus.setForeground(TEXT_COLOR);
+        lblJumlah.setForeground(TEXT_COLOR);
+        panel.add(lblStatus, BorderLayout.WEST);
+        panel.add(lblJumlah, BorderLayout.EAST);
+        return panel;
+    }
+
+    private void simpanJadwal() {
+        if (txtNama.getText().trim().isEmpty() || txtDosen.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Data belum lengkap!");
+            return;
+        }
+
+        tableModel.addRow(new Object[]{
+                dateFormat.format(dcTanggal.getDate()), // Format tanggal agar mudah dibaca
+                cbHari.getSelectedItem(),
+                txtJamMulai.getText() + " - " + txtJamSelesai.getText(),
+                txtRuang.getText(),
+                txtNama.getText(),
+                txtDosen.getText(),
+                spSKS.getValue()
+        });
+        
+        
+        if (cbReminder.isSelected()) {
+    try {
+        LocalTime jamMulai = LocalTime.parse(txtJamMulai.getText());
+        reminderService.pasangReminder(
+            txtNama.getText(),
+            jamMulai,
+            5 // 10 menit sebelum
+        );
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this,
+            "Format jam salah! Gunakan HH:mm (contoh 08:00)");
+    }
+}
+
+        clearForm();
+        updateStatus("Jadwal berhasil disimpan");
+    }
+
+    private void isiFormDariTabel() {
+        selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            
+            try {
+                // Konversi string tanggal kembali ke objek Date
+                String tanggalStr = tableModel.getValueAt(selectedRow, 0).toString();
+                dcTanggal.setDate(dateFormat.parse(tanggalStr));
+            } catch (Exception e) {
+                dcTanggal.setDate(null); // Kosongkan jika ada error parsing
+            }
+            cbHari.setSelectedItem(tableModel.getValueAt(selectedRow, 0));
+            String[] jam = tableModel.getValueAt(selectedRow, 1).toString().split(" - ");
+            txtJamMulai.setText(jam[0]);
+            txtJamSelesai.setText(jam[1]);
+            txtRuang.setText(tableModel.getValueAt(selectedRow, 3).toString());
+            txtNama.setText(tableModel.getValueAt(selectedRow, 2).toString());
+            txtDosen.setText(tableModel.getValueAt(selectedRow, 3).toString());
+            spSKS.setValue(Integer.parseInt(tableModel.getValueAt(selectedRow, 4).toString()));
+        }
+    }
+
+    private void editJadwal() {
+        if (selectedRow < 0) return;
+        
+        tableModel.setValueAt(dateFormat.format(dcTanggal.getDate()), selectedRow, 0);
+        tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 0);
+        tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 1);
+        tableModel.setValueAt(txtRuang.getText(), selectedRow, 3);
+        tableModel.setValueAt(txtNama.getText(), selectedRow, 2);
+        tableModel.setValueAt(txtDosen.getText(), selectedRow, 3);
+        tableModel.setValueAt(spSKS.getValue(), selectedRow, 4);
+
+        clearForm();
+    }
+
+    private void hapusJadwal() {
+        if (selectedRow < 0) return;
+        tableModel.removeRow(selectedRow);
+        clearForm();
+    }
+
+    private void clearForm() {
+        txtNama.setText("");
+        txtDosen.setText("");
+        txtRuang.setText("");
+        txtJamMulai.setText("08:00");
+        txtJamSelesai.setText("10:00");
+        spSKS.setValue(2);
+        dcTanggal.setDate(null); 
+        selectedRow = -1;
+        updateJumlah();
+    }
+
+    private void updateStatus(String text) {
+        lblStatus.setText("Status: " + text);
+        updateJumlah();
+    }
+
+    private void updateJumlah() {
+        lblJumlah.setText("Jadwal: " + tableModel.getRowCount());
+    }
+
+    private void addField(JPanel panel, GridBagConstraints gbc, int y, String label, Component field) {
+        gbc.gridx = 0;
+        gbc.gridy = y;
+        JLabel lbl = new JLabel(label);
+        lbl.setForeground(TEXT_COLOR); // ✅ TEMA: Warna teks label
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(field, gbc);
+    }
+    
+    private TitledBorder createTitledBorder(String title) {
+        TitledBorder border = new TitledBorder(title);
+        border.setTitleColor(TEXT_COLOR);
+        return border;
+    }
+    
+    private void styleButton(JButton button) {
+        button.setBackground(ACCENT_COLOR);
+        button.setForeground(TEXT_COLOR); // Teks tombol hitam
+        button.setOpaque(true);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+    
+    private void styleTable(JTable table) {
+        table.setBackground(Color.WHITE);
+        table.setForeground(TEXT_COLOR);
+        table.setSelectionBackground(TABLE_SELECTION_COLOR);
+        table.setSelectionForeground(TEXT_COLOR);
+        table.setGridColor(new Color(220, 220, 220));
+        table.getTableHeader().setBackground(ACCENT_COLOR);
+        table.getTableHeader().setForeground(TEXT_COLOR); // Teks header hitam
+        table.setRowHeight(25);
+    }
+    private ReminderService reminderService = new ReminderService();
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new JadwalKuliahApp().setVisible(true));
+    }
+}
