@@ -294,7 +294,7 @@ public class JadwalKuliahApp extends JFrame {
             }
             cbHari.setSelectedItem(tableModel.getValueAt(selectedRow, 0));
             String[] jam = tableModel.getValueAt(selectedRow, 1).toString().split(" - ");
-            txtJamMulai.setText(jam[0]);
+            txtJamMulai.setText(jam[1]);
             txtJamSelesai.setText(jam[1]);
             txtRuang.setText(tableModel.getValueAt(selectedRow, 3).toString());
             txtNama.setText(tableModel.getValueAt(selectedRow, 2).toString());
@@ -307,12 +307,12 @@ public class JadwalKuliahApp extends JFrame {
         if (selectedRow < 0) return;
         
         tableModel.setValueAt(dateFormat.format(dcTanggal.getDate()), selectedRow, 0);
-        tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 0);
-        tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 1);
+        tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 1);
+        tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 2);
         tableModel.setValueAt(txtRuang.getText(), selectedRow, 3);
-        tableModel.setValueAt(txtNama.getText(), selectedRow, 2);
-        tableModel.setValueAt(txtDosen.getText(), selectedRow, 3);
-        tableModel.setValueAt(spSKS.getValue(), selectedRow, 4);
+        tableModel.setValueAt(txtNama.getText(), selectedRow, 4);
+        tableModel.setValueAt(txtDosen.getText(), selectedRow, 5);
+        tableModel.setValueAt(spSKS.getValue(), selectedRow, 6);
 
         clearForm();
     }
