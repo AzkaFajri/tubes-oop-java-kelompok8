@@ -4,11 +4,11 @@ import java.time.*;
 
 public class MataKuliah {
     private String nama;
-    private DayOfWeek hari;
+    private String hari;
     private LocalTime mulai;
     private LocalTime selesai;
 
-    public MataKuliah(String nama, DayOfWeek hari, LocalTime mulai, LocalTime selesai) {
+    public MataKuliah(String nama, String hari, String par, LocalTime mulai, LocalTime selesai, String text2, int par1) {
         this.nama = nama;
         this.hari = hari;
         this.mulai = mulai;
@@ -16,7 +16,7 @@ public class MataKuliah {
     }
 
     public String getNama() { return nama; }
-    public DayOfWeek getHari() { return hari; }
+    public String getHari() { return hari; }
     public LocalTime getMulai() { return mulai; }
     public LocalTime getSelesai() { return selesai; }
 
