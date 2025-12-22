@@ -4,22 +4,27 @@
  */
 package jadwalkuliah.reminder;
 
-import java.util.TimerTask;
 import javax.swing.*;
+import java.time.LocalTime;
 
-public class ReminderTask extends TimerTask {
-    private String pesan;
+public class ReminderTask implements Runnable {
 
-    public ReminderTask(String pesan) {
-        this.pesan = pesan;
+    private String namaMK;
+    private LocalTime jamMulai;
+
+    public ReminderTask(String namaMK, LocalTime jamMulai) {
+        this.namaMK = namaMK;
+        this.jamMulai = jamMulai;
     }
 
     @Override
     public void run() {
         JOptionPane.showMessageDialog(
             null,
-            pesan,
-            "Reminder Jadwal Kuliah",
+            "⏰ Reminder Jadwal Kuliah\n\n" +
+            "Mata Kuliah : " + namaMK +
+            "\nJam Mulai   : " + jamMulai,
+            "Pengingat Jadwal",
             JOptionPane.INFORMATION_MESSAGE
         );
     }
