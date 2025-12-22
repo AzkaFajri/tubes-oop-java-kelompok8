@@ -24,6 +24,4 @@ public class JadwalManager {
 
     public List<MataKuliah> getSemua() {
         return daftar;
-    }} {
-    
-}
+    }} 
