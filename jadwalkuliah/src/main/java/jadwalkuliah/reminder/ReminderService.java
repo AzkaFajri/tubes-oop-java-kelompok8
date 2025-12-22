@@ -4,35 +4,28 @@
  */
 package jadwalkuliah.reminder;
 
-import jadwalkuliah.model.MataKuliah;
 import java.time.*;
-import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ReminderService {
+
     private Timer timer = new Timer();
 
-    public void pasangReminder(MataKuliah mk, int menitSebelum) {
-        LocalDate tanggal = LocalDate.now();
-        while (tanggal.getDayOfWeek() != mk.getHari()) {
-            tanggal = tanggal.plusDays(1);
-        }
+    public void pasangReminder(String namaMK, LocalTime jamMulai, int menitSebelum) {
 
-        LocalDateTime waktuKuliah =
-            LocalDateTime.of(tanggal, mk.getMulai());
-        LocalDateTime waktuReminder =
-            waktuKuliah.minusMinutes(menitSebelum);
+        LocalDateTime sekarang = LocalDateTime.now();
+        LocalDateTime waktuKuliah = LocalDateTime.of(LocalDate.now(), jamMulai);
+        LocalDateTime waktuReminder = waktuKuliah.minusMinutes(menitSebelum);
 
-        long delay =
-            Duration.between(LocalDateTime.now(), waktuReminder).toMillis();
+        long delay = Duration.between(sekarang, waktuReminder).toMillis();
+        if (delay <= 0) return;
 
-        if (delay > 0) {
-            timer.schedule(
-                new ReminderTask(
-                    "Mata kuliah " + mk.getNama() +
-                    " dimulai " + menitSebelum + " menit lagi"
-                ),
-                delay
-            );
-        }
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new ReminderTask(namaMK, jamMulai).run();
+            }
+        }, delay);
     }
 }
