@@ -128,3 +128,74 @@ public class JadwalKuliahApp extends JFrame {
         tableModel = new DefaultTableModel(
                 new String[]{"Tanggal", "Hari", "Jam", "Ruang", "Mata Kuliah", "Dosen", "SKS"}, 0
         );
+        table = new JTable(tableModel);
+        styleTable(table);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(createTitledBorder("Daftar Jadwal Kuliah"));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        
+        
+        JButton btnEdit = new JButton("Edit");
+        styleButton(btnEdit);
+
+        JButton btnHapus = new JButton("Hapus");
+        styleButton(btnHapus);
+
+        JPanel btnPanel = new JPanel();
+        btnPanel.setOpaque(false); // Biarkan transparan agar warna primer kelihatan
+        btnPanel.add(btnEdit);
+        btnPanel.add(btnHapus);
+        
+        panel.add(formPanel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
+        btnSimpan.addActionListener(e -> simpanJadwal());
+        btnEdit.addActionListener(e -> editJadwal());
+        btnHapus.addActionListener(e -> hapusJadwal());
+
+        table.getSelectionModel().addListSelectionListener(e -> isiFormDariTabel());
+
+        return panel;
+    }
+
+    // KALENDER VIEW 
+    private JPanel kalenderPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(createTitledBorder("Kalender Jadwal Kuliah"));
+
+        DefaultTableModel kalenderModel = new DefaultTableModel(
+                new String[]{"Tanggal", "Hari", "Jam", "Ruang", "Mata Kuliah", "Dosen", "SKS"}, 0);
+        JTable kalenderTable = new JTable(kalenderModel);
+        styleTable(kalenderTable);
+
+        JButton btnRefresh = new JButton("Tampilkan ke Kalender");
+        styleButton(btnRefresh);
+
+        btnRefresh.addActionListener(e -> {
+            kalenderModel.setRowCount(0);
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                kalenderModel.addRow(new Object[]{
+                        tableModel.getValueAt(i, 0),
+                        tableModel.getValueAt(i, 1),
+                        tableModel.getValueAt(i, 2),
+                        tableModel.getValueAt(i, 3),
+                        tableModel.getValueAt(i, 4),
+                        tableModel.getValueAt(i, 5),
+                        tableModel.getValueAt(i, 6),
+
+                });
+            }
+        });
+
+        panel.add(new JScrollPane(kalenderTable), BorderLayout.CENTER);
+
+        JPanel bottom = new JPanel();
+        bottom.setOpaque(false);
+        bottom.add(btnRefresh);
+        panel.add(bottom, BorderLayout.SOUTH);
+        
+        return panel;
+    }
