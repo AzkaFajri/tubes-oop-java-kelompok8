@@ -309,9 +309,7 @@ public class JadwalKuliahApp extends JFrame {
         tableModel.setValueAt(dateFormat.format(dcTanggal.getDate()), selectedRow, 0);
         tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 1);
         tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 2);
-
         tableModel.setValueAt(txtRuang.getSelectedItem(), selectedRow, 3);
-        tableModel.setValueAt(txtRuang.getText(), selectedRow, 3);
         tableModel.setValueAt(txtNama.getText(), selectedRow, 4);
         tableModel.setValueAt(txtDosen.getText(), selectedRow, 5);
         tableModel.setValueAt(spSKS.getValue(), selectedRow, 6);
