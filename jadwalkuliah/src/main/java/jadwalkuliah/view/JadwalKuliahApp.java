@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import jadwalkuliah.reminder.ReminderService;
 import java.time.LocalTime;
+import jadwalkuliah.controller.JadwalController;
 
 /**
  *
@@ -29,7 +30,7 @@ public class JadwalKuliahApp extends JFrame {
     private static final Color TABLE_SELECTION_COLOR = new Color(248, 187, 208); // Biru muda untuk seleksi
     
     private JTextField txtNama, txtDosen, txtJamMulai, txtJamSelesai;
-    private JTextField txtRuang; 
+    private JComboBox<String> txtRuang; 
     private JSpinner spSKS;
     private JComboBox<String> cbHari;
     private JDateChooser dcTanggal; 
@@ -84,7 +85,7 @@ public class JadwalKuliahApp extends JFrame {
 
         txtNama = new JTextField(30);
         txtDosen = new JTextField(30);
-        txtRuang = new JTextField(20);
+        txtRuang = new JComboBox<>(new String[]{"A.2.1","A.2.2","A.2.3","A.2.4","A.2.5","A.2.6","A.3.1","A.3.2","A.3.3","A.3.4","A.3.5","A.3.6","A.4.1","A.4.2","A.4.3","A.4.4","A.5.1","A.5.2","A.5.3","A.5.4","A.5.5","A.5.6","Aula"});
         spSKS = new JSpinner(new SpinnerNumberModel(2, 1, 6, 1));
         cbHari = new JComboBox<>(new String[]{"Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"});
         dcTanggal = new JDateChooser(); // 
@@ -217,12 +218,42 @@ public class JadwalKuliahApp extends JFrame {
             JOptionPane.showMessageDialog(this, "Data belum lengkap!");
             return;
         }
+        
+        try {
+        
+        String hariBaru = cbHari.getSelectedItem().toString();
+        String jamBaru = txtJamMulai.getText() + " - " + txtJamSelesai.getText();
+
+        LocalTime mulaiBaru = LocalTime.parse(txtJamMulai.getText());
+        LocalTime selesaiBaru = LocalTime.parse(txtJamSelesai.getText());
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+        String hariLama = tableModel.getValueAt(i, 1).toString();
+
+        if (!hariBaru.equals(hariLama)) continue;
+
+        String jamLamaStr = tableModel.getValueAt(i, 2).toString();
+        String[] jamSplit = jamLamaStr.split(" - ");
+
+        LocalTime mulaiLama = LocalTime.parse(jamSplit[0]);
+        LocalTime selesaiLama = LocalTime.parse(jamSplit[1]);
+
+    
+        if (mulaiBaru.isBefore(selesaiLama) &&
+        selesaiBaru.isAfter(mulaiLama)) {
+
+        throw new jadwalkuliah.exception.KonflikWaktuException(
+            "Konflik jadwal! Waktu bertabrakan dengan jadwal lain."
+                );
+            }
+        }
+
 
         tableModel.addRow(new Object[]{
                 dateFormat.format(dcTanggal.getDate()), // Format tanggal agar mudah dibaca
                 cbHari.getSelectedItem(),
                 txtJamMulai.getText() + " - " + txtJamSelesai.getText(),
-                txtRuang.getText(),
+                txtRuang.getSelectedItem(),
                 txtNama.getText(),
                 txtDosen.getText(),
                 spSKS.getValue()
@@ -235,7 +266,7 @@ public class JadwalKuliahApp extends JFrame {
         reminderService.pasangReminder(
             txtNama.getText(),
             jamMulai,
-            5 // 10 menit sebelum
+            5 // 5 menit sebelum
         );
     } catch (Exception ex) {
         JOptionPane.showMessageDialog(this,
@@ -246,6 +277,9 @@ public class JadwalKuliahApp extends JFrame {
         clearForm();
         updateStatus("Jadwal berhasil disimpan");
     }
+        catch (jadwalkuliah.exception.KonflikWaktuException e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+        }}
 
     private void isiFormDariTabel() {
         selectedRow = table.getSelectedRow();
@@ -260,9 +294,9 @@ public class JadwalKuliahApp extends JFrame {
             }
             cbHari.setSelectedItem(tableModel.getValueAt(selectedRow, 0));
             String[] jam = tableModel.getValueAt(selectedRow, 1).toString().split(" - ");
-            txtJamMulai.setText(jam[0]);
+            txtJamMulai.setText(jam[1]);
             txtJamSelesai.setText(jam[1]);
-            txtRuang.setText(tableModel.getValueAt(selectedRow, 3).toString());
+            txtRuang.setSelectedItem(tableModel.getValueAt(selectedRow, 3).toString());
             txtNama.setText(tableModel.getValueAt(selectedRow, 2).toString());
             txtDosen.setText(tableModel.getValueAt(selectedRow, 3).toString());
             spSKS.setValue(Integer.parseInt(tableModel.getValueAt(selectedRow, 4).toString()));
@@ -273,12 +307,12 @@ public class JadwalKuliahApp extends JFrame {
         if (selectedRow < 0) return;
         
         tableModel.setValueAt(dateFormat.format(dcTanggal.getDate()), selectedRow, 0);
-        tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 0);
-        tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 1);
-        tableModel.setValueAt(txtRuang.getText(), selectedRow, 3);
-        tableModel.setValueAt(txtNama.getText(), selectedRow, 2);
-        tableModel.setValueAt(txtDosen.getText(), selectedRow, 3);
-        tableModel.setValueAt(spSKS.getValue(), selectedRow, 4);
+        tableModel.setValueAt(cbHari.getSelectedItem(), selectedRow, 1);
+        tableModel.setValueAt(txtJamMulai.getText() + " - " + txtJamSelesai.getText(), selectedRow, 2);
+        tableModel.setValueAt(txtRuang.getSelectedItem(), selectedRow, 3);
+        tableModel.setValueAt(txtNama.getText(), selectedRow, 4);
+        tableModel.setValueAt(txtDosen.getText(), selectedRow, 5);
+        tableModel.setValueAt(spSKS.getValue(), selectedRow, 6);
 
         clearForm();
     }
@@ -292,7 +326,6 @@ public class JadwalKuliahApp extends JFrame {
     private void clearForm() {
         txtNama.setText("");
         txtDosen.setText("");
-        txtRuang.setText("");
         txtJamMulai.setText("08:00");
         txtJamSelesai.setText("10:00");
         spSKS.setValue(2);
@@ -346,6 +379,8 @@ public class JadwalKuliahApp extends JFrame {
         table.setRowHeight(25);
     }
     private ReminderService reminderService = new ReminderService();
+    private JadwalController controller;
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new JadwalKuliahApp().setVisible(true));
